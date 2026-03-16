@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>检索结果</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .probe-section {
+            margin-bottom: 30px;
+        }
+        .probe-section h2 {
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .probe-image {
+            max-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .results-section {
+            margin-top: 30px;
+        }
+        .results-section h2 {
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .result-item {
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .similarity {
+            font-weight: bold;
+            color: #333;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+        .back-link:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>检索结果</h1>
+        
+        <div class="probe-section">
+            <h2>探针图</h2>
+            <img src="{{ url_for('static', filename='../uploads/' + probe) }}" alt="探针图" class="probe-image">
+        </div>
+        
+        <div class="results-section">
+            <h2>匹配结果（按相似度排序）</h2>
+            <div class="results-grid">
+                {% for result in results %}
+                <div class="result-item">
+                    <img src="{{ url_for('static', filename='../uploads/' + result.path) }}" alt="结果图" class="result-image">
+                    <div class="similarity">相似度: {{ "%.4f"|format(result.similarity) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <a href="/" class="back-link">返回首页</a>
+    </div>
+</body>
+</html>
