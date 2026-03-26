@@ -13,7 +13,7 @@ print(f"使用设备: {device}")
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 # 构建项目路径
-project_path = os.path.join(current_dir, '..', 'paper', 'hyx_AIM_CCReID')
+project_path = os.path.join(current_dir, '..', 'hyx_AIM_CCReID')
 project_path = os.path.abspath(project_path)
 
 # 添加项目路径到系统路径
@@ -88,20 +88,26 @@ def load_model(model_path):
     
     return model
 
-def extract_features(model, image_path):
+def extract_features(model, image_input):
     """提取图像特征 - 参考单图匹配代码，包含水平翻转增强"""
-    # 图片预处理
+    # 图片预处理 - 添加灰度转换以排除颜色干扰
     data_transforms = transforms.Compose([
         transforms.Resize((config.DATA.HEIGHT, config.DATA.WIDTH)),
+        transforms.Grayscale(num_output_channels=3),  # 转换为灰度图但保持3通道
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
     
     # 处理图片
-    if not os.path.exists(image_path):
-        raise FileNotFoundError(f"图片文件不存在：{image_path}")
+    if isinstance(image_input, str):
+        # 如果输入是文件路径
+        if not os.path.exists(image_input):
+            raise FileNotFoundError(f"图片文件不存在：{image_input}")
+        image = Image.open(image_input).convert('RGB')
+    else:
+        # 如果输入是PIL图像
+        image = image_input.convert('RGB')
     
-    image = Image.open(image_path).convert('RGB')
     image_tensor = data_transforms(image)
     input_batch = image_tensor.unsqueeze(0)
     

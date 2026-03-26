@@ -84,7 +84,7 @@
         
         <div class="probe-section">
             <h2>探针图</h2>
-            <img src="{{ url_for('static', filename='../uploads/' + probe) }}" alt="探针图" class="probe-image">
+            <img src="{{ url_for('uploaded_file', filename=probe) }}" alt="探针图" class="probe-image">
         </div>
         
         <div class="results-section">
@@ -92,8 +92,9 @@
             <div class="results-grid">
                 {% for result in results %}
                 <div class="result-item">
-                    <img src="{{ url_for('static', filename='../uploads/' + result.path) }}" alt="结果图" class="result-image">
+                    <img src="{{ url_for('uploaded_file', filename=result.path) }}" alt="结果图" class="result-image">
                     <div class="similarity">相似度: {{ "%.4f"|format(result.similarity) }}</div>
+                    <div class="original-file" style="font-size: 12px; color: #666; margin-top: 5px;">来源: {{ result.original_filename }}</div>
                 </div>
                 {% endfor %}
             </div>

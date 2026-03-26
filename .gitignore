@@ -1,0 +1,14 @@
+# 忽略 yolov8 模型文件
+yolov8x.pt
+
+# 如果你之后还有其他 yolov8 权重文件，也可以用通配符
+# yolov8*.pt
+
+# 同时建议忽略 Python 运行时文件
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+
+# 忽略上传文件夹（如果不需要提交用户上传内容）
+uploads/
