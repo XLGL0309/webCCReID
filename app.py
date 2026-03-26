@@ -72,12 +72,35 @@ def delete_files_after_request(response):
         threading.Thread(target=delete_files).start()
     return response
 
-# 加载模型
-model_path = 'E:/PythonProjects/hyx_AIM_CCReID/results/ltcc/1/eval_single_gpu_3060/best_model.pth.tar'
-model = load_model(model_path)
+# 获取所有可用的模型
+def get_available_models():
+    """获取results目录下所有可用的模型"""
+    models = []
+    results_path = 'E:/PythonProjects/hyx_AIM_CCReID/results'
+    
+    if os.path.exists(results_path):
+        # 遍历数据集目录（ltcc, prcc等）
+        for dataset in os.listdir(results_path):
+            dataset_path = os.path.join(results_path, dataset)
+            if os.path.isdir(dataset_path):
+                # 遍历训练次数目录（数字）
+                for train_num in os.listdir(dataset_path):
+                    train_path = os.path.join(dataset_path, train_num)
+                    if os.path.isdir(train_path):
+                        # 查找模型文件
+                        model_path = os.path.join(train_path, 'eval_single_gpu_3060', 'best_model.pth.tar')
+                        if os.path.exists(model_path):
+                            model_name = f"{dataset}_{train_num}"
+                            models.append({'name': model_name, 'path': model_path})
+    
+    return models
 
 # 初始化行人检测器
 detector = PersonDetector()
+
+# 全局模型变量
+current_model = None
+current_model_path = None
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -85,7 +108,9 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # 获取所有可用的模型
+    models = get_available_models()
+    return render_template('index.html', models=models)
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -102,6 +127,18 @@ def upload():
     gallery_files = request.files.getlist('gallery')
     if not gallery_files:
         return redirect(request.url)
+    
+    # 检查是否选择了模型
+    if 'model' not in request.form:
+        return redirect(request.url)
+    model_path = request.form['model']
+    
+    # 加载选择的模型
+    global current_model, current_model_path
+    if current_model_path != model_path:
+        print(f"加载新模型: {model_path}")
+        current_model = load_model(model_path)
+        current_model_path = model_path
     
     # 创建临时目录存储检测到的行人
     temp_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'temp')
@@ -129,7 +166,7 @@ def upload():
             gallery_paths.append(gallery_path)
     
     # 提取探针图特征
-    probe_features = extract_features(model, probe_path)
+    probe_features = extract_features(current_model, probe_path)
     
     # 处理底库图片：检测行人并提取特征
     gallery_features = []
@@ -149,14 +186,14 @@ def upload():
                     print(f"文件存在: {person_path}, 大小: {os.path.getsize(person_path)} bytes")
                 else:
                     print(f"文件不存在: {person_path}")
-                features = extract_features(model, person_path)
+                features = extract_features(current_model, person_path)
                 # 保存原始图片路径和裁剪后的图片路径
                 gallery_features.append((person_path, features, gallery_path))
                 detected_person_paths.append(person_path)
         else:
             # 如果没有检测到行人，使用整张图片
             print(f"未检测到行人，使用整张图片: {gallery_path}")
-            features = extract_features(model, gallery_path)
+            features = extract_features(current_model, gallery_path)
             gallery_features.append((gallery_path, features, gallery_path))
     
     # 计算相似度并排序 - 参考单图匹配代码的相似度计算方式
