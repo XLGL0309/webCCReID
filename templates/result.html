@@ -4,83 +4,227 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>检索结果</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            background-color: #f5f5f5;
         }
+        
         .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             max-width: 1000px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            animation: fadeIn 0.8s ease-out;
         }
-        h1 {
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
             text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
             color: #333;
-        }
-        .probe-section {
-            margin-bottom: 30px;
-        }
-        .probe-section h2 {
-            color: #555;
+            font-size: 2.2rem;
+            font-weight: 700;
             margin-bottom: 10px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .probe-image {
-            max-width: 300px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+        
+        .probe-section {
+            margin-bottom: 40px;
+            text-align: center;
         }
-        .results-section {
-            margin-top: 30px;
-        }
-        .results-section h2 {
-            color: #555;
+        
+        .probe-section h2 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 600;
             margin-bottom: 20px;
         }
+        
+        .probe-image {
+            max-width: 300px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .probe-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .results-section {
+            margin-top: 40px;
+        }
+        
+        .results-section h2 {
+            color: #333;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
         }
+        
         .result-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
             text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .result-image {
+            width: 100%;
+            height: auto;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
             background-color: #f9f9f9;
         }
-        .result-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 4px;
-            margin-bottom: 10px;
+        
+        .result-item:hover .result-image {
+            transform: scale(1.05);
         }
+        
         .similarity {
-            font-weight: bold;
-            color: #333;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
         }
+        
+        .original-file {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
         .back-link {
             display: inline-block;
-            margin-top: 30px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
+            margin-top: 40px;
+            padding: 12px 24px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
             color: white;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
+        
         .back-link:hover {
-            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .back-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .back-link:hover::before {
+            left: 100%;
+        }
+        
+        .center-link {
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 20px;
+            }
+            
+            .result-image {
+                height: 180px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .probe-image {
+                max-width: 250px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>检索结果</h1>
+        <div class="header">
+            <h1>检索结果</h1>
+        </div>
         
         <div class="probe-section">
             <h2>探针图</h2>
@@ -94,13 +238,15 @@
                 <div class="result-item">
                     <img src="{{ url_for('uploaded_file', filename=result.path) }}" alt="结果图" class="result-image">
                     <div class="similarity">相似度: {{ "%.4f"|format(result.similarity) }}</div>
-                    <div class="original-file" style="font-size: 12px; color: #666; margin-top: 5px;">来源: {{ result.original_filename }}</div>
+                    <div class="original-file">来源: {{ result.original_filename }}</div>
                 </div>
                 {% endfor %}
             </div>
         </div>
         
-        <a href="/" class="back-link">返回首页</a>
+        <div class="center-link">
+            <a href="/" class="back-link">返回首页 🏠</a>
+        </div>
     </div>
 </body>
 </html>

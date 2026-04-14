@@ -90,7 +90,7 @@ def load_model(model_path):
 
 def extract_features(model, image_input):
     """提取图像特征 - 参考单图匹配代码，包含水平翻转增强"""
-    # 图片预处理 - 添加灰度转换以排除颜色干扰
+    # 图片预处理
     data_transforms = transforms.Compose([
         transforms.Resize((config.DATA.HEIGHT, config.DATA.WIDTH)),
         transforms.Grayscale(num_output_channels=3),  # 转换为灰度图但保持3通道
@@ -99,34 +99,40 @@ def extract_features(model, image_input):
     ])
     
     # 处理图片
-    if isinstance(image_input, str):
-        # 如果输入是文件路径
-        if not os.path.exists(image_input):
-            raise FileNotFoundError(f"图片文件不存在：{image_input}")
-        image = Image.open(image_input).convert('RGB')
-    else:
-        # 如果输入是PIL图像
-        image = image_input.convert('RGB')
-    
-    image_tensor = data_transforms(image)
-    input_batch = image_tensor.unsqueeze(0)
-    
-    # 将输入数据移动到GPU
-    input_batch = input_batch.to(device)
-    
-    # 水平翻转增强提取特征（和训练逻辑一致）
-    flip_img = torch.flip(input_batch, [3])
-    flip_img = flip_img.to(device)
-    
-    # 提取特征 - ResNet50返回(old_x, f)
-    with torch.no_grad():
-        _, batch_features = model(input_batch)
-        _, batch_features_flip = model(flip_img)
-    
-    # 融合翻转特征并归一化
-    batch_features = (batch_features + batch_features_flip) / 2
-    batch_features = torch.nn.functional.normalize(batch_features, p=2, dim=1)
-    
-    # 转换为numpy数组
-    features = batch_features.cpu().numpy().flatten()
-    return features
+    try:
+        if isinstance(image_input, str):
+            # 如果输入是文件路径
+            if not os.path.exists(image_input):
+                print(f"图片文件不存在：{image_input}")
+                raise FileNotFoundError(f"图片文件不存在：{image_input}")
+            image = Image.open(image_input).convert('RGB')
+        else:
+            # 如果输入是PIL图像
+            image = image_input.convert('RGB')
+        
+        image_tensor = data_transforms(image)
+        input_batch = image_tensor.unsqueeze(0)
+        
+        # 将输入数据移动到GPU
+        input_batch = input_batch.to(device)
+        
+        # 水平翻转增强提取特征（和训练逻辑一致）
+        flip_img = torch.flip(input_batch, [3])
+        flip_img = flip_img.to(device)
+        
+        # 提取特征 - ResNet50返回(old_x, f)
+        with torch.no_grad():
+            _, batch_features = model(input_batch)
+            _, batch_features_flip = model(flip_img)
+        
+        # 融合翻转特征并归一化
+        batch_features = (batch_features + batch_features_flip) / 2
+        batch_features = torch.nn.functional.normalize(batch_features, p=2, dim=1)
+        
+        # 转换为numpy数组
+        features = batch_features.cpu().numpy().flatten()
+        return features
+    except Exception as e:
+        print(f"提取特征失败: {e}")
+        # 返回一个全零的特征向量，长度与模型输出一致
+        return np.zeros(config.MODEL.FEATURE_DIM)
